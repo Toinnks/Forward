@@ -50,5 +50,10 @@ git add . 改动的添加到暂存区
 
  查看远程分支 git branch -r
 
+删除分支 git branch -d new
+
+删除远程分支 git push origin --delete  new 
+
 git fetch origin
 
+修改文件后不git add .就会消失
