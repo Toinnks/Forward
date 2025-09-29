@@ -32,12 +32,23 @@ git add . 改动的添加到暂存区
 
 添加说明git commit -m "更新"
 
-git push origin main
+提交推送分支git push origin main
 
 
 
-切换分支 
 
-git checkout main
+
+切换分支 git checkout main
+
+新建分支 git checkout -b new
+
+合并分支若切换到main分支里，然后git merge new,则是将new合并到main中
+
+**合并冲突**时会出现(main|MERGING)，要手动去冲突文件删除冲突标志信息
+
+然后 git add 文件名，提交合并信息git commit -m "合并冲突"，最后删除分支 git branch -d new 
+
+ 查看远程分支 git branch -r
 
 git fetch origin
+
