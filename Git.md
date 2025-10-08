@@ -80,6 +80,4 @@ git fetch origin
 
 
 
-修改文件后不git add .就会消失
-=======
 中文乱码 git config --global core.quotepath false
