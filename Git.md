@@ -6,7 +6,7 @@
 
 
 
-**gitbash新建库之后上传整个文件夹的过程：**
+**gitbash新建远程库之后上传本地整个文件夹的过程：**
 
 首先进入路径cd /d/else/else/Ghosten-Player 
 
@@ -24,7 +24,29 @@
 
 
 
-改动更新：
+**gitbash远程库中已经有内容，本地文件夹首次提交的操作**
+
+首先进入路径cd /d/else/else/Ghosten-Player 
+
+其次初始化git init（注意自己的分支名称）
+
+建立远程连接git remote add origin https://github.com/你的用户名/仓库名.git
+
+先拉一下，拉到本地git pull origin main --allow-unrelated-histories（因为本地分支没有提交过，所以要允许没有提交历史的分支进行拉取）
+
+
+
+所有文件加入暂存区 git add .
+
+添加说明 git comment -m "首次提交"
+
+想改名字的话git branch -M main
+
+最后提交 git push -u origin main 首次的话尽量带u，相当于为本地分支设置一个默认对应的远程分支
+
+
+
+**改动更新：**
 
 首先可以 git status 看下那些文件修改过
 
@@ -56,4 +78,8 @@ git add . 改动的添加到暂存区
 
 git fetch origin
 
+
+
 修改文件后不git add .就会消失
+=======
+中文乱码 git config --global core.quotepath false

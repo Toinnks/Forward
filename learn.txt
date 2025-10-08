@@ -1,0 +1,76 @@
+将这段代码使用fastapi封装成接口，基于fastmcp 封装成mcp服务
+
+uvicorn air_api_xiecheng:app --reload --host 0.0.0.0 --port 9632
+
+nohup uvicorn air_api:app --reload --host 0.0.0.0 --port 9632 > uvicorn.log 2>&1 &
+这个命令做了以下几件事：
+
+nohup - 使命令在用户退出登录后继续运行
+
+> uvicorn.log - 将标准输出重定向到 uvicorn.log 文件
+
+2>&1 - 将标准错误也重定向到同一日志文件
+
+& - 在后台运行进程
+
+
+netstat -ano | findstr "端口号"  查看端口号被使用情况，找出pid
+
+taskkill /F /PID pid号		     关闭pid号
+
+deepseek-test：sk-59295acd81fe4331946946e0285863db
+
+10.0.4.28服务器密码：
+==lingxi!mm4
+
+29服务器密码
+dllmttgmm
+
+http://10.0.4.28:9010/login
+rag_flow
+infini_rag_flow
+
+windows服务器
+10.0.4.101:22
+SF
+sffwq
+
+推理优化，用很少的token实现很强的推理效果，是一个很好的工作方向
+
+工地项目VPN信息；
+VPN : https://115.236.172.194:4430
+请求网页后根据系统安装VPN连接客户端
+账号：zhongyi
+密码：HZwuji@1234555
+
+堡垒机：https://172.16.252.6
+wangjie
+2Qazxsw2!@2026
+
+GDPFDKHXFJJJMYHW
+
+程序-数据库ip端口：172.16.252.141:5432  139
+数据库版本：postgresql-11
+账号：postgres
+密码：Codvision@2020
+
+http://172.16.252.138/
+admin
+qshdtestEnv@24
+
+
+rk3588:
+arm架构
+八核64位大小核架构，4Cortex-A76 + 4Cortex-A55
+有专门用于深度推理的npu单元
+带宽最高可以达到32G
+视频解码能力业挺强的
+ yolo detect train data=data.yaml model=yolo11n.pt epochs=100 imgsz=640 batch=16
+
+
+电脑、平板、电源、充电宝、洗面奶、两套衣服、
+11/54
+
+
+
+
