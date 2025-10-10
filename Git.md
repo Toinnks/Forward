@@ -81,3 +81,9 @@ git fetch origin
 
 
 中文乱码 git config --global core.quotepath false
+
+查看历史版本：git log --oneline
+
+
+
+某个场景：如果你的远程仓库某个文件修改过，你本地仓库的该文件也修改过，你想先pull一下该文件，那么 需要用到git stash，先把该文件的修改藏起来，然后git pull，最后git stash pop 这时候可能会冲突。
