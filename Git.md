@@ -34,8 +34,6 @@
 
 先拉一下，拉到本地git pull origin main --allow-unrelated-histories（因为本地分支没有提交过，所以要允许没有提交历史的分支进行拉取）
 
-
-
 所有文件加入暂存区 git add .
 
 添加说明 git comment -m "首次提交"
@@ -75,3 +73,5 @@ git add . 改动的添加到暂存区
 git fetch origin
 
 中文乱码 git config --global core.quotepath false
+
+dd
