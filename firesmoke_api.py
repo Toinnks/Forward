@@ -69,85 +69,95 @@ def detect_frame(stream_name, rtsp_url, frame, conf):
     if last_alarm_time and (now - last_alarm_time).total_seconds() < 300:
         print(f"[{stream_name}] 跳过报警，距离上次报警不足5分钟")
         return
+    
+    # 统一将帧转为 BGR 格式以供 OpenCV 使用
+    original_frame_bgr = cv2.cvtColor(frame.copy(), cv2.COLOR_RGB2BGR)
 
-    frame = frame.copy()
-    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+    print(f"[{stream_name}] 第一次检测开始 (conf={conf})")
+    results = model.predict(original_frame_bgr, save=False, conf=conf)
+    
+    # 精确筛选出所有类别为0且置信度达标的目标
+    high_conf_detections = []
+    if results[0].boxes:
+        for box in results[0].boxes:
+            # 使用 box.cls 和 box.conf 进行精确判断
+            print(f"类别: {model.names[int(box.cls)]}, 置信度: {box.conf:.2f}")
+            if int(box.cls) == 0 and float(box.conf) >= conf:
+                high_conf_detections.append(box)
 
-    print(f"[{stream_name}] 第一次检测开始")
-    results = model.predict(frame, save=False,conf=conf)
-    has_high_conf = any(
-        s >= conf and int(c) == 0
-        for c, s in zip(results[0].boxes.cls.tolist(), results[0].boxes.conf.tolist())
-    ) if results[0].boxes else False
-
-    if has_high_conf:
-        print(f"[{stream_name}] 第一次检测成功")
-        detected_frame = frame.copy()
-        for m in results:
-            box = m.boxes
-            cls = box.cls
-            cf = box.conf
-            for det, c, s in zip(box.xyxy.tolist(), cls.tolist(), cf.tolist()):
-                if int(c) != 0:
-                    continue  # ✅ 只处理类别为 0
-                if s >= conf:
-                    x1, y1, x2, y2 = det
-                    label = f"{model.names[int(c)]} {s:.2f}"
-                    cv2.rectangle(detected_frame, (int(x1), int(y1)), (int(x2), int(y2)), (255, 0, 0), 2)
-                    (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
-                    cv2.rectangle(detected_frame, (int(x1), int(y1) - h - 10), (int(x1) + w, int(y1)), (255, 0, 0), -1)
-                    cv2.putText(detected_frame, label, (int(x1), int(y1) - 5),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-                    count += 1
+    if high_conf_detections:
+        print(f"[{stream_name}] 第一次检测成功，发现 {len(high_conf_detections)} 个目标")
+        detected_frame = original_frame_bgr.copy()
+        for box in high_conf_detections:
+            x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
+            s = float(box.conf)
+            c = int(box.cls)
+            label = f"{model.names[c]} {s:.2f}"
+            cv2.rectangle(detected_frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
+            (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
+            cv2.rectangle(detected_frame, (x1, y1 - h - 10), (x1 + w, y1), (255, 0, 0), -1)
+            cv2.putText(detected_frame, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            count += 1
     else:
         print(f"[{stream_name}] 第一次检测未发现目标，进入第二次检测")
-        h, w, _ = frame.shape
-        crops = [frame[:h//2, :w//2], frame[:h//2, w//2:], frame[h//2:, :w//2], frame[h//2:, w//2:]]
+        h, w, _ = original_frame_bgr.shape
+        # 定义切片区域和它们的左上角偏移量
+        crops_data = [
+            (original_frame_bgr[0:h//2, 0:w//2], (0, 0)),
+            (original_frame_bgr[0:h//2, w//2:w], (w//2, 0)),
+            (original_frame_bgr[h//2:h, 0:w//2], (0, h//2)),
+            (original_frame_bgr[h//2:h, w//2:w], (w//2, h//2))
+        ]
 
-        highest_confidence = 0
-        best_crop = None
-        best_results = None
+        best_detection_info = None
+        highest_confidence_found = 0
 
-        for i, crop in enumerate(crops):
+        for i, (crop, (offset_x, offset_y)) in enumerate(crops_data):
             print(f"[{stream_name}] 检测子区域 {i+1}")
-            crop_results = model.predict(crop, save=False,conf=conf)
-            crop_conf = crop_results[0].boxes.conf if crop_results[0].boxes else []
-            crop_cls = crop_results[0].boxes.cls if crop_results[0].boxes else []
+            crop_results = model.predict(crop, save=False, conf=conf)
+            if crop_results[0].boxes:
+                for box in crop_results[0].boxes:
+                    current_conf = float(box.conf)
+                    # 同样进行精确判断
+                    if int(box.cls) == 0 and current_conf >= conf:
+                        if current_conf > highest_confidence_found:
+                            highest_confidence_found = current_conf
+                            # 存储最好的检测框信息和它的偏移量
+                            best_detection_info = {
+                                "box": box,
+                                "offset_x": offset_x,
+                                "offset_y": offset_y
+                            }
 
-            filtered_conf = [s for c, s in zip(crop_cls.tolist(), crop_conf.tolist()) if int(c) == 0]
-            print(f"[{stream_name}] 子区域 {i+1} 类别0置信度: {filtered_conf}")
+        # 如果在所有切片中找到了至少一个满足条件的目标
+        if best_detection_info:
+            print(f"[{stream_name}] 第二次检测成功，最高置信度为 {highest_confidence_found:.2f}")
+            detected_frame = original_frame_bgr.copy()  # 在原始大图上绘制
+            
+            box = best_detection_info["box"]
+            offset_x = best_detection_info["offset_x"]
+            offset_y = best_detection_info["offset_y"]
+            
+            x1_crop, y1_crop, x2_crop, y2_crop = map(int, box.xyxy[0].tolist())
+            
+            # 将切片中的坐标转换回原始大图的坐标
+            x1, y1 = x1_crop + offset_x, y1_crop + offset_y
+            x2, y2 = x2_crop + offset_x, y2_crop + offset_y
+            
+            s = float(box.conf)
+            c = int(box.cls)
 
-            if filtered_conf:
-                max_conf = max(filtered_conf)
-                if max_conf > highest_confidence:
-                    highest_confidence = max_conf
-                    best_crop = crop
-                    best_results = crop_results
-
-        if highest_confidence >= conf:
-            print(f"[{stream_name}] 第二次检测成功，最高置信度为 {highest_confidence}")
-            detected_frame = best_crop
-            for m in best_results:
-                box = m.boxes
-                cls = box.cls
-                cf = box.conf
-                for det, c, s in zip(box.xyxy.tolist(), cls.tolist(), cf.tolist()):
-                    if int(c) != 0:
-                        continue  # ✅ 只处理类别为 0
-                    if s >= conf:
-                        x1, y1, x2, y2 = det
-                        label = f"{model.names[int(c)]} {s:.2f}"
-                        cv2.rectangle(detected_frame, (int(x1), int(y1)), (int(x2), int(y2)), (255, 0, 0), 2)
-                        (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
-                        cv2.rectangle(detected_frame, (int(x1), int(y1) - h - 10),
-                                      (int(x1) + w, int(y1)), (255, 0, 0), -1)
-                        cv2.putText(detected_frame, label, (int(x1), int(y1) - 5),
-                                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
-                        count += 1
+            label = f"{model.names[c]} {s:.2f}"
+            cv2.rectangle(detected_frame, (x1, y1), (x2, y2), (255, 0, 0), 2)
+            (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
+            cv2.rectangle(detected_frame, (x1, y1 - h - 10), (x1 + w, y1), (255, 0, 0), -1)
+            cv2.putText(detected_frame, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            count = 1  # 二次检测只上报最优的一个目标
         else:
             print(f"[{stream_name}] 两次检测均未发现目标")
 
-    if detected_frame is not None:
+    # 后续的告警发送逻辑保持不变
+    if detected_frame is not None and count > 0:
         alarm_time = now.strftime('%Y-%m-%d_%H-%M-%S')
         alarm_filename = f"{stream_name}-{alarm_time}-firesmoke.jpg"
         alarm_filepath = f"/firesmoke/alarmpic/{alarm_filename}"
@@ -166,6 +176,7 @@ def detect_frame(stream_name, rtsp_url, frame, conf):
             "alarmPic": alarm_filepath,
             "alarmVideo": video_output_file
         }
+        print(f"[{stream_name}] 预警发送，目标置信度: {s:.2f}")
         send_alarm(payload, send_url1, send_url2, stream_name, count)
         save_alarm_video(video_filename, rtsp_url)
 
