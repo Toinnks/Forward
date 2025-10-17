@@ -290,6 +290,12 @@ conda deactivate						退出虚拟环境
 
 conda remove -n xxxx --all				删除环境
 
+# redis
+
+redis只能存储字符串
+
+所以存的时候要json.dumps()
+
 # MySQL
 
 ##### 命令行进入mysql：
@@ -419,53 +425,74 @@ WEB服务器，最基础且最重要的功能就是处理http请求。
 
 - id 是查看数据的内存地址
 
-- **字典的简单语法**：
 
-  ```
-  dic = {"小明": ["6岁", 120], "小红": ["5岁", 110], "小华": ["7岁", 140], "张三": ["10岁", 150]}
-  print(dic)
-  dic["小黑"]=['11岁',190]
-  print(dic)
-  dic.pop("小明")
-  print(dic)
-  for i,(key ,value) in enumerate(dic.items(),1):
-      print(f"{i}. {key}: {value}")
-  v = dic.values()#取出所有的值
-  k = dic.keys()#取出所有的键
-  ```
+#### **字典的简单语法**：
 
-- 字典的键只能是不可变的数据类型，而值可以是任意数据类型，使用字典的fromkeys可以将字符串的各个字符转换为键，也可以将列表内各项转换成键
+```
+dic = {"小明": ["6岁", 120], "小红": ["5岁", 110], "小华": ["7岁", 140], "张三": ["10岁", 150]}
+print(dic)
+dic["小黑"]=['11岁',190]
+print(dic)
+dic.pop("小明")
+print(dic)
+for i,(key ,value) in enumerate(dic.items(),1):
+    print(f"{i}. {key}: {value}")
+v = dic.values()#取出所有的值
+k = dic.keys()#取出所有的键
+```
 
-- set是创建一个集合，对于集合se1和se2,可以交并差，如se1-se2是取差集，不过是以se1为主导
+字典的键只能是不可变的数据类型，而值可以是任意数据类型，使用字典的fromkeys可以将字符串的各个字符转换为键，也可以将列表内各项转换成键
 
-  ```
-  se1 = {2, 4, 6, 7}
-  se2 = {2, 5, 7, 3}
-  #交，并，差
-  temp1=se1&se2
-  print(temp1)
-  temp2=se1|se2
-  print(temp2)
-  temp3=se1-se2
-  print(temp3)
-  ```
+#### 集合
 
-- str的join函数：用逗号连接列表中的字符串
+set是创建一个集合，对于集合se1和se2,可以交并差，如se1-se2是取差集，不过是以se1为主导
 
-  ```
-  words = ["Python", "Java", "C++"]
-  result = ", ".join(words)  # 用 ", " 连接
-  print(result)
-  ```
+```
+se1 = {2, 4, 6, 7}
+se2 = {2, 5, 7, 3}
+#交，并，差
+temp1=se1&se2
+print(temp1)
+temp2=se1|se2
+print(temp2)
+temp3=se1-se2
+print(temp3)
+```
 
-- **json**:
+#### str
 
-  ```
-  python数据 >> json数据：json.dumps(python数据，ensuer_ascii=False)
-  python数据 >> json文件：json.dump(python字典，json文件对象，ensuer_ascii=False)
-  json数据 >> python数据：json.loads(json数据)
-  json文件 >> python数据：json.load(json文件对象)
-  ```
+str的join函数：用逗号连接列表中的字符串
+
+```
+words = ["Python", "Java", "C++"]
+result = ", ".join(words)  # 用 ", " 连接
+print(result)
+```
+
+#### **json**:
+
+```
+import json
+
+dict1 = {
+    "name": "张三",
+    "age": 25,
+    "hobbies": ["篮球", "音乐"],
+    "is_student": True
+}
+print(type(dict1))
+json_string = json.dumps(dict1)
+print(type(json_string))
+data=json.loads(json_string)
+print(type(data))
+
+输出：
+<class 'dict'>
+<class 'str'>
+<class 'dict'>
+```
+
+
 
 
 - ##### Counter
@@ -500,20 +527,19 @@ WEB服务器，最基础且最重要的功能就是处理http请求。
   print(len(dict(result2)))  # 第二次迭代：zip已耗尽，输出0！
   ```
 
+#### map函数
 
-- ##### map函数
+map函数处理列表数据很舒服，对每个元素进行函数操作后在放到另一个对象中，原本操作的列表不会发生改变。
 
-  map函数处理列表数据很舒服，对每个元素进行函数操作后在放到另一个对象中，原本操作的列表不会发生改变。
-
-  ```
-  ls1=[12,23,389,23,45]
-  sum_temp=0
-  temp=map(lambda x:x*x,ls1)
-  print(ls1)
-  print(type(temp))
-  print(temp)
-  print(list(temp))#具体的使用还要强转
-  ```
+```
+ls1=[12,23,389,23,45]
+sum_temp=0
+temp=map(lambda x:x*x,ls1)
+print(ls1)
+print(type(temp))
+print(temp)
+print(list(temp))#具体的使用还要强转
+```
 
 
 #### 异常处理流程
