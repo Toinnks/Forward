@@ -87,8 +87,6 @@ pip install scrapy==2.9.0 scrapy-redis==0.7.3 Twisted==22.10.0 -i https://pypi.t
 
 nvidia-smi查看gpu
 
-cd ..返回上级,中间有个空格
-
 mkdir 创建目录
 
 pwd 显示当前目录
