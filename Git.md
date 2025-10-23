@@ -85,3 +85,27 @@ git fetch origin
 
 
 某个场景：如果你的远程仓库某个文件修改过，你本地仓库的该文件也修改过，你想先pull一下该文件，那么 需要用到git stash，先把该文件的修改藏起来，然后git pull，最后git stash pop 这时候可能会冲突。
+
+
+
+**SSH**
+
+```
+#打开git bash，输入
+ssh-keygen -t ed25519 -C "007sun6@gmail.com"
+
+# 启动 ssh-agent
+eval "$(ssh-agent -s)"
+
+# 将 SSH 私钥添加到 ssh-agent
+ssh-add ~/.ssh/id_ed25519
+
+cat ~/.ssh/id_ed25519.pub
+#复制输出的全部内容（以 ssh-ed25519 开头），进入github，点击头像，点击设置，选择ssh密钥，将粘贴的内容保存上去。
+
+#测试ssh连接
+ssh -T git@github.com
+#设置远程连接
+git remote set-url origin git@github.com:Toinnks/Forward.git
+
+```
