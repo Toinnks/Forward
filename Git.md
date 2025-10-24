@@ -6,7 +6,7 @@
 
 
 
-**gitbash新建远程库之后上传本地整个文件夹的过程：**
+#### **gitbash新建远程库之后上传本地整个文件夹的过程：**
 
 首先进入路径cd /d/else/else/Ghosten-Player 
 
@@ -24,13 +24,13 @@
 
 
 
-**gitbash远程库中已经有内容，本地文件夹首次提交的操作**
+#### **gitbash远程库中已经有内容，本地文件夹首次提交的操作**
 
 首先进入路径cd /d/else/else/Ghosten-Player 
 
 其次初始化git init（注意自己的分支名称）
 
-建立远程连接git remote add origin https://github.com/你的用户名/仓库名.git
+建立远程连接git remote add origin https://github.com/你的用户名/仓库名.git（这是https连接方式）
 
 先拉一下，拉到本地git pull origin main --allow-unrelated-histories（因为本地分支没有提交过，所以要允许没有提交历史的分支进行拉取）
 
@@ -44,7 +44,7 @@
 
 
 
-**改动更新：**
+#### 改动更新：
 
 首先可以 git status 看下那些文件修改过
 
@@ -56,25 +56,25 @@ git add . 改动的添加到暂存区
 
 
 
-
+#### 分支操作
 
 切换分支 git checkout main
 
 新建分支 git checkout -b new
 
-合并分支若切换到main分支里，然后git merge new,则是将new合并到main中
+查看远程分支 git branch -r
 
-**合并冲突**时会出现(main|MERGING)，要手动去冲突文件删除冲突标志信息
-
-然后 git add 文件名，提交合并信息git commit -m "合并冲突"，最后删除分支 git branch -d new 
-
- 查看远程分支 git branch -r
+合并分支：若切换到main分支里，然后git merge new,则是将new合并到main中
 
 删除分支 git branch -d new
 
 删除远程分支 git push origin --delete  new 
 
-git fetch origin
+
+
+**合并冲突**时会出现(main|MERGING)，要手动去冲突文件删除冲突标志信息
+
+然后 git add 文件名，提交合并信息git commit -m "合并冲突"，最后删除分支 git branch -d new 
 
 
 
@@ -84,11 +84,11 @@ git fetch origin
 
 
 
-某个场景：如果你的远程仓库某个文件修改过，你本地仓库的该文件也修改过，你想先pull一下该文件，那么 需要用到git stash，先把该文件的修改藏起来，然后git pull，最后git stash pop 这时候可能会冲突。
+某个场景：如果你的远程仓库某个文件修改过，你本地仓库的该文件也修改过，你想先pull一下该文件，那么 需要用到git stash，先把该文件的修改藏起来，然后git pull，最后git stash pop， 这时候可能会冲突。
 
 
 
-**SSH**
+**git使用SSH方式连接github**
 
 ```
 #打开git bash，输入
@@ -109,3 +109,37 @@ ssh -T git@github.com
 git remote set-url origin git@github.com:Toinnks/Forward.git
 
 ```
+
+
+
+#### git中回滚有多种情况
+
+文件未修改不需要回滚
+
+1. 文件已经修改但舍弃修改的情况
+
+   1. 文件已经git add
+
+      git restore
+
+   2. 文件已经git commit
+
+      如果是撤销commit，此时会保留修改，那么就git restore --staged 文件名，否则就git restore
+
+   3. 文件已经push
+
+      你git restore，远程
+
+2. 文件已经修改但保存修改版本的情况
+
+   1. 文件已经git add
+
+      使用git stash暂存，然后git stash pop恢复
+
+   2. 文件已经git commit
+
+   3. 文件已经push
+
+      git revert <commit_id>
+
+git rm --cached 文件名（取消追踪）
