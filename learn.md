@@ -1,88 +1,3 @@
-# 爬虫
-
-爬虫
-
-iframe允许在一个网页里嵌套另一个独立的网页，如果遇到iframe需要先定位到iframe
-
-```
-frame=page.frame_locator('iframe#login_frame')
-
-button=frame.locator('a#switcher_plogin.link')
-```
-
-浏览器滚动的两种方式：
-
-```
-1、
-for i in range(100):
-    page.mouse.wheel(0, random.randint(10,20))
-    page.wait_for_timeout(50)
-    if i%20==0:
-        page.wait_for_timeout(1000)
-2、
-page.evaluate("window.scrollBy(0, 500)")
-```
-
-本地浏览器打开：
-
-```
-broswer = p.chromium.launch_persistent_context(
-    # 指定本地谷歌浏览器安装目录的绝对路径
-    executable_path=r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
-
-    # 指定本地谷歌浏览器用户数据目录的绝对路径
-    user_data_dir=r"C:\Users\jiuge\AppData\Local\Google\Chrome\User Data",
-
-    # 开启有界面模式
-    headless=False
-)
-```
-
-远程连接：
-
-```
-import subprocess
-import os
-import time
-from playwright.sync_api import sync_playwright
-
-path = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
-params = "--remote-debugging-port=6789"
-user_data_dir=r"D:ChromeProfile"
-
-cmd = f'"{path}" {params} --user-data-dir="{user_data_dir}"'
-# 4.1 执行命令：通过 subprocess 执行终端命令
-subprocess.Popen(cmd,shell=True)
-# 4.2 执行命令：通过os模块执行终端命令
-# os.popen(cmd)
-time.sleep(2)
-
-with sync_playwright() as p:
-    # 连接本地启动的浏览器               本机(远程)IP:监听端口
-    browser = p.chromium.connect_over_cdp('http://127.0.0.1:6789')
-    if browser:
-        print("成功连接")
-    context=browser.contexts[0]
-    page=context.new_page()
-    page.wait_for_timeout(3 * 1000)
-
-    page.goto("https://www.dianping.com/")
-    page.wait_for_timeout(30*1000)
-    browser.close()
-```
-
-
-
-**referer反爬**：从哪个页面跳转的，或者从哪个页面来的api请求，该页面可能生成一个动态token，如果来源不对，就可能被视为爬虫。
-
-### scrapy
-
-```
-pip install scrapy==2.9.0 scrapy-redis==0.7.3 Twisted==22.10.0 -i https://pypi.tuna.tsinghua.edu.cn/simple
-```
-
-
-
 # Anaconda
 
 #### anaconda创建虚拟环境的方法
@@ -93,6 +8,20 @@ conda activate ana-sgy                                进入创建的虚拟环�
 conda deactivate						退出虚拟环境
 
 conda remove -n xxxx --all				删除环境
+
+#### 清华源
+
+```
+-i https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+#### 查看 pip 安装的包的位置
+
+```
+D:\softwareCode\anaconda\envs\pytorch-study(环境名)\Lib\site-packages
+```
+
+
 
 # redis
 
